@@ -14,8 +14,8 @@ export function redFlagsFromSignals(signals: Signal[]): RedFlag[] {
   return signals
     .slice()
     .sort((a, b) => b.weight - a.weight)
-    .flatMap((s) => s.evidence.slice(0, 2).map((quote) => ({ quote, why: s.label })))
-    .slice(0, 8);
+    .flatMap((s) => s.evidence.slice(0, 3).map((quote) => ({ quote, why: s.label })))
+    .slice(0, 10);
 }
 
 /** Result used when the model is unavailable or the message is too short to judge. */
