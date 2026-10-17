@@ -199,10 +199,10 @@ limits, shared-secret auth).
 - The listening waveform is decorative; it shows that the mic is open, not your voice level.
 - A verdict is a judgment, not a guarantee.
 
-## Not included
+## MCP scope
 
-A "scam of the week" teaching mode is not built. The MCP endpoint is stateless and offers one tool;
-it is guarded by one shared secret rather than per-user accounts or OAuth.
+The MCP endpoint is stateless and offers one tool. It is guarded by one shared secret rather than
+per-user accounts or OAuth.
 
 ## License
 
