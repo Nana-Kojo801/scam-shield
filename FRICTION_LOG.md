@@ -85,3 +85,20 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Actual:** the development-only "N" button sits over the bottom-left corner and covers text. It does not appear in production builds.
 - **Severity:** low.
 - **Workaround:** take final screenshots against `next start`.
+
+## 10. Design reference link could not be read by the usual fetch tools
+
+- **Task:** redesign the UI from a Dribbble shot.
+- **Steps:** fetched the shot URL, then tried `curl` with a browser user agent.
+- **Expected:** the page content or its image.
+- **Actual:** the fetch tool returned an empty page, and `curl` got an HTTP 202 with an empty body (a bot challenge, the content is rendered client-side).
+- **Severity:** medium. Without the image the redesign would have been guesswork.
+- **Workaround:** opened the page in the pre-installed Chromium through Playwright, read the `og:image` meta tag, and downloaded that image.
+- **Suggestion:** design-sharing sites could expose a plain-HTML preview or an oEmbed endpoint for tools.
+
+## 11. Same heading rendered twice after the redesign
+
+- **Task:** make the report work as both a phone screen and a desktop panel.
+- **Actual:** the phone screen header and the report both said "Report", which a scripted accessibility-tree query flagged as two headings.
+- **Severity:** low.
+- **Workaround:** keep the report's own heading for screen readers and focus, and show it visually only on desktop, where there is no screen header.

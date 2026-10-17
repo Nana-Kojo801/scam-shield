@@ -55,3 +55,9 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 - **Worked:** design tokens as CSS variables map cleanly to utilities; `next/font/google` self-hosts the fonts with no browser requests to Google.
 - **Needs work:** nothing blocking.
 - **Would use again:** yes.
+
+## Figtree (next/font) for the redesign
+
+- **Used for:** the single UI typeface after the redesign, with IBM Plex Mono kept for evidence quotes and signal text.
+- **Worked:** one variable font covers every weight used; no layout shift.
+- **Would use again:** yes.
