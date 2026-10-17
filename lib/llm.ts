@@ -15,6 +15,8 @@ Rules you must follow:
 - "red_flags[].quote" must be copied EXACTLY, character for character, from the message. Keep quotes short (a phrase, not the whole message).
 - You are given "rule_signals" from a deterministic pattern checker. They are hints, not verdicts. Agree or disagree based on the whole message.
 - If the message is too short or too ambiguous to judge, return "cannot_tell" and use "what_to_do" to say what extra information would help (who it claims to be, how it arrived, any link or number it contains).
+- Calibrate "confidence". Use "high" only when several independent signals agree, or when a message is clearly routine and self-contained. Short, casual or context-free messages should be "low" or "medium", because you cannot know who sent them.
+- For "likely_legit" messages keep "what_to_do" light (for example, how to double-check through the official app) and do not invent threats.
 - "spoken_summary" is at most 2 short sentences, written to be read aloud, with no symbols or lists.
 - "what_to_do" has 2 to 4 concrete, safe steps.
 - Do not write or improve scam messages. Only analyse.`;

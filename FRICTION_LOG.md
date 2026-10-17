@@ -41,6 +41,7 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Severity:** medium.
 - **Workaround:** stubbed-`fetch` tests; verify live once the key is added.
 - **Suggestion:** a prompt at session start to supply the secrets named in `.env.example`.
+- **Update:** the key was later pasted into the chat, which puts a live secret in the conversation transcript. It went into the gitignored `.env.local` only. A secrets field on the session would avoid this.
 
 ## 5. Per-IP rate limit gets in the way of manual testing
 

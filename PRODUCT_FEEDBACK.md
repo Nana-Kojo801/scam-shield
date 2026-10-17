@@ -22,9 +22,10 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 - **Used for:** the LLM judgment step; the request uses a strict JSON schema and the response is re-validated server-side.
 - **Worked:** the strict schema format maps directly onto the spec's `CheckResult` type, including the nullable `scam_type`.
 - **Needs work:** strict mode requires every property to be listed as required and `additionalProperties: false`, so "optional" has to be modelled as nullable.
-- **Status:** the call is covered by tests with a stubbed `fetch`. It has not yet been run against the live API, because no key was available in the build environment (see FRICTION_LOG #4).
-- **Onboarding:** to be completed after the first live run.
-- **Would use again:** to be completed after the first live run.
+- **Live results (gpt-4o-mini):** 10 manual messages. Strict JSON schema output parsed every time, and every red-flag quote was an exact substring. Obvious, subtle and polite-tone scams came back as `likely_scam`. An appointment reminder, a shipping notice and a real one-time-code message came back as `likely_legit`. A Spanish scam was caught even though the rules layer is English-only. An injection attempt inside the message was flagged as a red flag and not obeyed.
+- **Needs work:** the model rated a casual "call me back when you get a sec" as `likely_legit` with `high` confidence until the prompt told it to calibrate confidence for short, context-free messages; with that line it returns `cannot_tell` / `low`. Its `what_to_do` wording is generic.
+- **Onboarding:** quick; one endpoint, one header, and the schema format is well documented.
+- **Would use again:** yes, for a low-cost judgment step.
 
 ## Next.js 16 route handlers with Cache Components
 
