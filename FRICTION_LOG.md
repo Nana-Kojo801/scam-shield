@@ -102,3 +102,27 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Actual:** the phone screen header and the report both said "Report", which a scripted accessibility-tree query flagged as two headings.
 - **Severity:** low.
 - **Workaround:** keep the report's own heading for screen readers and focus, and show it visually only on desktop, where there is no screen header.
+
+## 12. Automated contrast audit flagged text that was only mid-fade
+
+- **Task:** accessibility pass with axe-core on every screen.
+- **Actual:** the first run reported contrast failures on text that was still fading in (colours sampled at partial opacity), mixed in with real failures (faint placeholder, dimmed pending rows, blue chip text at 4.28:1).
+- **Severity:** low.
+- **Workaround:** wait for animations to finish before sampling, and replace opacity-based dimming with solid colours.
+- **Suggestion:** axe could offer an option to wait for animations or ignore elements mid-transition.
+
+## 13. Fake-clock tests need small steps for React timers
+
+- **Task:** test the 35 second client timeout without waiting 35 seconds.
+- **Actual:** one large `clock.runFor` jump fires chained timers (each scheduled after a render) before React can schedule the next one, so the UI never reached the state under test.
+- **Severity:** low.
+- **Workaround:** advance the clock in small steps with a short real wait between them.
+- **Suggestion:** document this for chained, render-scheduled timers in Playwright's clock guide.
+
+## 14. Deploying needs credentials the build environment does not have
+
+- **Task:** deploy to Vercel from the cloud session.
+- **Actual:** Vercel was reachable, but there was no token or connector, so the repository owner imported the project themselves.
+- **Severity:** low.
+- **Workaround:** the owner deployed from the Vercel dashboard; the live site was then verified from outside.
+- **Suggestion:** a Vercel connector for sessions, or a clear place to supply a deploy token.

@@ -61,3 +61,17 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 - **Used for:** the single UI typeface after the redesign, with IBM Plex Mono kept for evidence quotes and signal text.
 - **Worked:** one variable font covers every weight used; no layout shift.
 - **Would use again:** yes.
+
+## Vercel (hosting)
+
+- **Used for:** hosting the app and the `/api/check` function. The repository owner deployed it from the dashboard; this note is from verifying it from outside.
+- **Worked:** the project built and served with no extra configuration; the server-side environment variable reached the function (the model ran on live requests); static pages are cached at the edge; error responses are correct JSON.
+- **Needs work:** from a cloud coding session there was no way to deploy without a pasted token (FRICTION_LOG #14). Preview deployments are behind sign-in by default, so they cannot be checked from outside.
+- **Would use again:** yes.
+
+## axe-core (accessibility audit)
+
+- **Used for:** automated WCAG 2.x A and AA checks on every screen at phone and desktop widths.
+- **Worked:** precise, actionable results with the failing colours and ratios; found three real contrast problems.
+- **Needs work:** mid-animation sampling gives false alarms (FRICTION_LOG #12). Automated checks cover only part of accessibility, so manual testing with a screen reader is still needed.
+- **Would use again:** yes.
