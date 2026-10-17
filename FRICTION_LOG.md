@@ -51,3 +51,37 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Severity:** low.
 - **Workaround:** send a different `x-forwarded-for` header per request in the test script.
 - **Suggestion:** none for the app; this is the limiter working as specified.
+
+## 6. Speech recognition cannot be exercised in headless Chromium
+
+- **Task:** test the voice flow (dictation, spoken verdict, follow-ups, permission denied) automatically.
+- **Steps:** drove the app with Playwright in the pre-installed Chromium.
+- **Expected:** `SpeechRecognition` and `speechSynthesis` to be testable or absent.
+- **Actual:** the constructor exists but there is no microphone or speech service, and `window.speechSynthesis` is a read-only accessor, so assigning a fake silently did nothing (my first test run "passed" nothing). Deleting `SpeechRecognition` alone did not simulate an unsupported browser, because the `webkit` prefixed one remained.
+- **Severity:** medium. The flow is only verifiable with an injected fake, and real-device behaviour still needs a manual check.
+- **Workaround:** `addInitScript` with `Object.defineProperty` for synthesis, and delete both recognition names.
+- **Suggestion:** a documented test double for the Web Speech API in Playwright.
+
+## 7. The assistant's own voice can be picked up by the microphone
+
+- **Task:** the two-step flow where the assistant says "Okay, read me the message" and then listens.
+- **Expected:** to be able to start recognition after the prompt finished.
+- **Actual:** browsers generally only allow `SpeechRecognition.start()` from a user gesture or after permission, so starting it after the utterance ends can fail on first use. Starting it on the tap instead lets the mic hear the prompt.
+- **Severity:** medium.
+- **Workaround:** start recognition on the tap but gate it: results are discarded until the prompt finishes (with a 4 second timeout in case the end event never fires, which some browsers do).
+- **Suggestion:** an echo-cancelled recognition mode, or a reliable utterance-end signal across browsers. Needs a real-phone check in Phase 3.
+
+## 8. React lint rule rejects the usual "detect browser support" pattern
+
+- **Task:** read `SpeechRecognition` support and `prefers-reduced-motion` on the client.
+- **Actual:** the starter's `react-hooks/set-state-in-effect` rule flags `useEffect(() => setX(...), [])`. The accepted pattern is `useSyncExternalStore` with a server snapshot, which is less discoverable.
+- **Severity:** low.
+- **Workaround:** `useSyncExternalStore` for both.
+- **Suggestion:** the rule's message could point at `useSyncExternalStore` for capability detection.
+
+## 9. Next dev indicator overlaps bottom-left UI in screenshots
+
+- **Task:** review mobile screenshots.
+- **Actual:** the development-only "N" button sits over the bottom-left corner and covers text. It does not appear in production builds.
+- **Severity:** low.
+- **Workaround:** take final screenshots against `next start`.

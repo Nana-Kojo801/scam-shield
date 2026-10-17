@@ -33,3 +33,25 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 - **Worked:** plain Web `Request` and `Response` handlers; the bundled docs in `node_modules/next/dist/docs` were accurate.
 - **Needs work:** `export const runtime` is rejected when `cacheComponents` is on, and the error only shows when a request is served (see FRICTION_LOG #3).
 - **Would use again:** yes.
+
+## Web Speech API (SpeechRecognition and speechSynthesis)
+
+- **Used for:** dictating the message, live transcript, spoken verdict, voice follow-ups.
+- **Worked:** interim results make a live transcript easy; synthesis needs no setup; feature detection is simple, so typed input stays a complete fallback.
+- **Needs work:** support is uneven across browsers, the `webkit` prefix is still needed, errors are coarse strings, and the recognizer can hear the assistant's own speech (FRICTION_LOG #7). The utterance end event is not reliable everywhere.
+- **Onboarding:** quick to a demo, slow to make robust.
+- **Would use again:** yes, only with a text fallback.
+
+## Playwright (browser testing)
+
+- **Used for:** screenshots at phone and desktop widths, reduced-motion check, and driving the voice flow with injected fakes.
+- **Worked:** `addInitScript` makes browser APIs easy to fake; the pre-installed Chromium needed no download.
+- **Needs work:** headless Chromium exposes real-looking speech APIs that do nothing (FRICTION_LOG #6).
+- **Would use again:** yes.
+
+## Tailwind CSS 4 and next/font
+
+- **Used for:** layout utilities and the paper, ink and verdict colour tokens (`@theme inline`); Zilla Slab, Public Sans and IBM Plex Mono.
+- **Worked:** design tokens as CSS variables map cleanly to utilities; `next/font/google` self-hosts the fonts with no browser requests to Google.
+- **Needs work:** nothing blocking.
+- **Would use again:** yes.
