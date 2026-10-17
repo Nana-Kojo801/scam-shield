@@ -152,3 +152,18 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Severity:** medium for the hackathon track, low for the code.
 - **Workaround:** test against the official SDK client over real HTTP, locally and on the deployment.
 - **Suggestion:** a public conformance checker or test harness for Alexa+ MCP servers.
+
+## 18. A secret-protected endpoint has to decide what "not configured" means
+
+- **Task:** put a shared secret on `/api/mcp`.
+- **Actual:** the obvious version (check the token if one is set) is open by default, so a forgotten environment variable on the host silently leaves the endpoint public, and the owner would never see an error. The opposite choice (refuse until configured) is safe but means the live endpoint stops working between deploying the code and adding the variable.
+- **Severity:** medium, because the failure is silent.
+- **Workaround:** fail closed in production (503 with a clear message), open outside production, with an explicit `MCP_ALLOW_UNAUTHENTICATED=true` opt-out. The variable is therefore added to the host before the code is deployed.
+- **Suggestion:** hosts could warn when code reads an environment variable that is not set for the target environment.
+
+## 19. Brute-force limiting must not punish the legitimate caller
+
+- **Task:** slow down token guessing.
+- **Actual:** reusing the per-request limiter would have counted valid calls too, throttling real clients (a session is three requests). Only failed attempts are counted, against a separate key, so a real client sharing an address with an attacker still gets through.
+- **Severity:** low.
+- **Workaround:** a separate failure-only counter, covered by tests.

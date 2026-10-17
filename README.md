@@ -95,6 +95,14 @@ tool, so any MCP client or voice assistant can call it, not just this website.
   behave identically. The server is in `lib/mcp.ts`, the HTTP route in `app/api/mcp/route.ts`.
 - **Stateless:** no sessions, no server-to-client stream. Every POST gets one JSON response, which
   suits serverless hosting. `GET` and `DELETE` return 405.
+- **Authentication:** a shared secret, sent as `Authorization: Bearer <token>`. Set `MCP_AUTH_TOKEN`
+  (16 or more characters) on the server; generate one with `openssl rand -hex 32`. Without it the
+  endpoint **refuses every request in production** (503), so a forgotten variable cannot leave it
+  open. `MCP_ALLOW_UNAUTHENTICATED=true` opts out on purpose, and outside production an unset token
+  leaves the endpoint open so local development just works. Tokens are compared in constant time,
+  wrong or missing ones get `401` with a `WWW-Authenticate: Bearer` challenge, and repeated
+  failures from one client are rate limited. This is a static shared secret, not OAuth, so share it
+  only with clients you trust and rotate it by changing the variable and redeploying.
 - **Safety:** `Origin` is validated (DNS rebinding protection). Calls from agents and assistants
   carry no `Origin` and are allowed; a browser page is allowed only from this site's own origin or
   one listed in `MCP_ALLOWED_ORIGINS` (comma separated). Tool calls are rate limited per client;
@@ -107,7 +115,11 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const client = new Client({ name: "demo", version: "1.0.0" });
-await client.connect(new StreamableHTTPClientTransport(new URL("https://scam-shield-murex.vercel.app/api/mcp")));
+await client.connect(
+  new StreamableHTTPClientTransport(new URL("https://scam-shield-murex.vercel.app/api/mcp"), {
+    requestInit: { headers: { Authorization: `Bearer ${process.env.MCP_AUTH_TOKEN}` } },
+  }),
+);
 const result = await client.callTool({ name: "check_message", arguments: { message: "Pay a small fee within 24 hours or your parcel is returned." } });
 console.log(result.structuredContent.verdict);
 ```
@@ -116,6 +128,7 @@ or with plain HTTP:
 
 ```bash
 curl -s https://scam-shield-murex.vercel.app/api/mcp \
+  -H "authorization: Bearer $MCP_AUTH_TOKEN" \
   -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
 ```
@@ -130,6 +143,7 @@ Amazon's own tooling.
 app/api/check/route.ts   POST /api/check
 app/api/mcp/route.ts     POST /api/mcp (MCP over Streamable HTTP)
 lib/mcp.ts               the MCP server and its check_message tool
+lib/mcp-auth.ts          shared-secret check for /api/mcp
 lib/rules.ts             the deterministic rules
 lib/llm.ts               prompt, JSON schema, call, output validation
 lib/fallback.ts          rules-only result
@@ -157,6 +171,7 @@ npm run lint && npx tsc --noEmit
 | --- | --- |
 | `OPENAI_API_KEY` | Server-side only. Without it the app runs in rules-only mode. |
 | `OPENAI_MODEL` | Optional. Defaults to `gpt-4o-mini` for low cost. |
+| `MCP_AUTH_TOKEN` | Shared secret for `/api/mcp` (16+ characters). Required in production; see [MCP server](#mcp-server). |
 | `MCP_ALLOWED_ORIGINS` | Optional. Extra browser origins allowed to call `/api/mcp`, comma separated. |
 
 ### Deploying to Vercel
@@ -167,11 +182,11 @@ security headers, including a Permissions-Policy that allows the microphone for 
 
 ## Testing
 
-`npm test` runs 102 unit tests: every rule (including guards against flagging legitimate text),
+`npm test` runs 114 unit tests: every rule (including guards against flagging legitimate text),
 quote validation, the rules-only fallback, the rate limiter, the route's input handling, the model
 call with a stubbed `fetch`, annotation segments, follow-up intents, and the MCP server (driven by
 the official SDK client, plus the HTTP route: handshake, version negotiation, origin checks,
-limits).
+limits, shared-secret auth).
 
 ## Known limits
 
@@ -187,8 +202,7 @@ limits).
 ## Not included
 
 A "scam of the week" teaching mode is not built. The MCP endpoint is stateless and offers one tool;
-there is no authentication on it, the same as the website, so it relies on the rate limit and the
-input caps.
+it is guarded by one shared secret rather than per-user accounts or OAuth.
 
 ## License
 

@@ -89,3 +89,9 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 - **Used for:** the MCP tool's input and output schemas.
 - **Worked:** v4 works with the SDK as a peer dependency; `.trim().min().max()` gave clear error messages that the SDK returns as tool errors.
 - **Would use again:** yes.
+
+## Node.js `crypto` (timingSafeEqual, createHash)
+
+- **Used for:** comparing the shared secret in constant time.
+- **Worked:** hashing both values to fixed-length digests first avoids `timingSafeEqual` throwing on unequal lengths and avoids leaking the secret's length.
+- **Would use again:** yes.
