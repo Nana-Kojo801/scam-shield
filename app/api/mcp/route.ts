@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer } from "@/lib/mcp";
+import { checkMcpAuth } from "@/lib/mcp-auth";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 export const maxDuration = 30;
@@ -33,6 +34,9 @@ const isToolCall = (m: unknown) => !!m && typeof m === "object" && (m as { metho
 
 export async function POST(request: Request) {
   if (!originAllowed(request)) return rpcError(403, -32000, "Origin not allowed.");
+
+  const denied = checkMcpAuth(request);
+  if (denied) return denied;
 
   const length = Number(request.headers.get("content-length") ?? 0);
   if (length > MAX_BODY_BYTES) return rpcError(413, -32000, "Request too large.");
