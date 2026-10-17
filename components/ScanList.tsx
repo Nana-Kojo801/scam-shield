@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { checkStatuses } from "@/lib/checks";
 import type { Signal } from "@/lib/types";
+import { CheckIcon } from "./Icons";
 
 const STEP_MS = 130;
 
@@ -28,30 +29,36 @@ export function ScanList({ signals, reduced, onRevealed }: { signals: Signal[]; 
   }, [revealed, statuses.length, reduced]);
 
   const foundCount = statuses.slice(0, revealed).filter((s) => s.found.length).length;
+  const pct = Math.round((revealed / statuses.length) * 100);
 
   return (
-    <section aria-label="Pattern checks" className="rise">
-      <h2 className="font-display text-2xl font-semibold">Running the checks</h2>
-      <p className="mt-1 font-mono text-xs uppercase tracking-[0.18em] text-ink-soft" role="status">
-        {revealed < statuses.length ? `Check ${revealed + 1} of ${statuses.length}` : `Waiting on the second opinion`} · {foundCount} found
+    <section aria-label="Pattern checks" className="rise rounded-[24px] bg-card p-5">
+      <h2 className="text-xl font-semibold">Running the checks</h2>
+      <p className="mt-1 text-sm text-muted" role="status">
+        {revealed < statuses.length ? `Check ${revealed + 1} of ${statuses.length}` : "Getting a second opinion"} · {foundCount} found
       </p>
-      <ol className="mt-4 border-t-2 border-ink">
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-blue-tint" aria-hidden="true">
+        <div className="h-full rounded-full bg-blue transition-[width] duration-200" style={{ width: `${pct}%` }} />
+      </div>
+      <ol className="mt-4">
         {statuses.map((c, i) => {
           const done = i < revealed;
           const hit = done && c.found.length > 0;
           return (
-            <li key={c.key} className="flex items-center gap-3 border-b border-rule py-2" style={{ opacity: done || i === revealed ? 1 : 0.4 }}>
+            <li key={c.key} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0" style={{ opacity: done || i === revealed ? 1 : 0.4 }}>
               <span
-                className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 ${done ? "tick-in" : ""}`}
-                style={{ borderColor: hit ? "var(--scam)" : "var(--ink)", background: hit ? "var(--scam)" : "transparent" }}
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${done ? "tick-in" : ""}`}
+                style={{
+                  background: hit ? "var(--scam)" : done ? "var(--green-tint)" : "var(--blue-tint)",
+                  color: hit ? "#fff" : "var(--legit)",
+                }}
                 aria-hidden="true"
               >
-                {done && !hit && <span className="block h-0.5 w-2.5 bg-ink" />}
-                {hit && <span className="block h-2 w-2 bg-paper" />}
+                {hit ? <span className="block h-2 w-2 rounded-full bg-white" /> : done ? <CheckIcon className="h-3.5 w-3.5" /> : null}
               </span>
               <span className="flex-1">{c.label}</span>
-              <span className="font-mono text-xs uppercase tracking-wider" style={{ color: hit ? "var(--scam)" : "var(--ink-soft)" }}>
-                {!done ? (i === revealed ? "checking" : "") : hit ? `found ${c.found.length}` : "clear"}
+              <span className="text-sm font-medium" style={{ color: hit ? "var(--scam)" : "var(--muted)" }}>
+                {!done ? (i === revealed ? "checking…" : "") : hit ? `${c.found.length} found` : "clear"}
               </span>
             </li>
           );
