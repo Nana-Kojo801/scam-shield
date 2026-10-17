@@ -45,7 +45,7 @@ export function ScanList({ signals, reduced, onRevealed }: { signals: Signal[]; 
           const done = i < revealed;
           const hit = done && c.found.length > 0;
           return (
-            <li key={c.key} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0" style={{ opacity: done || i === revealed ? 1 : 0.4 }}>
+            <li key={c.key} className={`flex items-center gap-3 border-b border-line py-2.5 last:border-b-0 ${done || i === revealed ? "" : "text-muted"}`}>
               <span
                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${done ? "tick-in" : ""}`}
                 style={{

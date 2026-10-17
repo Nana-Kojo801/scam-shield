@@ -18,6 +18,7 @@ import { usePrefersReducedMotion, useRecognizer, useSpeaker, useSupport } from "
 type Phase = "home" | "compose" | "prompting" | "listening" | "checking" | "result";
 
 const PROMPT = "Okay, read me the message.";
+const CLIENT_TIMEOUT_MS = 35_000;
 const FOLLOWUPS = ["Why?", "What should I do?", "Read me the red flags", "Check another"];
 const TITLES: Record<Phase, string> = {
   home: "Scam Shield",
@@ -90,6 +91,12 @@ export function Desk() {
     setPhase("checking");
     setAnnounce("Checking the message.");
 
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      ctrl.abort();
+    }, CLIENT_TIMEOUT_MS);
+
     try {
       const res = await fetch("/api/check", {
         method: "POST",
@@ -104,8 +111,12 @@ export function Desk() {
         gateRef.current.response = json as CheckResponse;
       }
     } catch (err) {
-      if ((err as Error).name === "AbortError") return;
-      gateRef.current.error = "I couldn't reach the checker. Check your connection and try again.";
+      if ((err as Error).name === "AbortError" && !timedOut) return; // the user moved on
+      gateRef.current.error = timedOut
+        ? "That took too long. Please try again, or try a shorter message."
+        : "I couldn't reach the checker. Check your connection and try again.";
+    } finally {
+      clearTimeout(timer);
     }
     tryFinish();
   };
@@ -209,6 +220,9 @@ export function Desk() {
 
   return (
     <div className="min-h-dvh">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-white">
+        Skip to the message checker
+      </a>
       <p className="sr-only" role="status" aria-live="polite">{announce}</p>
 
       <Nav
@@ -238,7 +252,7 @@ export function Desk() {
           </header>
         )}
 
-        <main className="mt-6 lg:mt-8 lg:grid lg:grid-cols-[minmax(380px,460px)_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <main id="main" tabIndex={-1} className="mt-6 outline-none lg:mt-8 lg:grid lg:grid-cols-[minmax(380px,460px)_minmax(0,1fr)] lg:items-start lg:gap-8">
           <div className={`${leftOnPhone ? "" : "hidden"} lg:block`}>
             {voiceBusy ? (
               <ListenPane prompting={phase === "prompting"} prompt={PROMPT} heard={recognizer.heard} onDone={recognizer.stop} onCancel={cancelVoice} />
@@ -299,7 +313,7 @@ export function Desk() {
 
                   <div className="mt-4 flex flex-wrap gap-2">
                     {FOLLOWUPS.map((q) => (
-                      <button key={q} type="button" onClick={() => ask(q)} className="min-h-10 rounded-full bg-blue-tint px-4 text-sm font-medium text-blue-strong hover:bg-blue/25">{q}</button>
+                      <button key={q} type="button" onClick={() => ask(q)} className="min-h-10 rounded-full bg-blue-tint px-4 text-sm font-medium text-blue-ink hover:bg-blue-tint/70">{q}</button>
                     ))}
                   </div>
 
@@ -310,7 +324,7 @@ export function Desk() {
                       value={followText}
                       onChange={(e) => setFollowText(e.target.value)}
                       placeholder={recognizer.listening ? (recognizer.heard || "Listening…") : "Why? What should I do?"}
-                      className="min-w-0 flex-1 bg-transparent text-[0.9375rem] focus:outline-none"
+                      className="min-w-0 flex-1 bg-transparent text-[0.9375rem] placeholder:text-muted focus:outline-none"
                     />
                     {support.recognition && (
                       <button type="button" onClick={askByVoice} aria-label={recognizer.listening ? "Stop listening" : "Ask by voice"} aria-pressed={recognizer.listening} className={`flex h-10 w-10 items-center justify-center rounded-full ${recognizer.listening ? "bg-scam text-white" : "bg-card"}`}>

@@ -69,7 +69,7 @@ export function Composer({ draft, setDraft, channel, setChannel, onSubmit, texta
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             rows={7}
-            className="w-full resize-none bg-transparent text-[1.0625rem] leading-relaxed placeholder:text-muted/80 focus:outline-none"
+            className="w-full resize-none bg-transparent text-[1.0625rem] leading-relaxed placeholder:text-muted focus:outline-none"
             placeholder="Paste the text, email or call transcript…"
           />
           <div className="flex justify-between text-xs text-muted">

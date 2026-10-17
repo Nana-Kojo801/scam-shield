@@ -48,12 +48,12 @@ export function ListenPane({ prompting, prompt, heard, onDone, onCancel }: Props
   return (
     <section aria-label="Listening" className="rise flex min-h-[calc(100dvh-9rem)] flex-col overflow-hidden rounded-[28px] bg-bg lg:min-h-[640px] lg:bg-card">
       <div className="mx-auto mt-2 flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm lg:bg-bg">
-        <span className="font-semibold text-blue-strong">Scam Shield</span>
+        <span className="font-semibold text-blue-ink">Scam Shield</span>
         <span>{prompt}</span>
       </div>
 
       <div className="fade-top flex min-h-40 flex-1 flex-col justify-end px-6 pb-4 pt-6 text-center">
-        <p className="whitespace-pre-wrap break-words text-[1.375rem] leading-snug text-ink/80" aria-live="off">
+        <p className="whitespace-pre-wrap break-words text-[1.375rem] leading-snug text-ink" aria-live="off">
           {heard || <span className="text-muted">{listening ? "Go ahead, I’m listening…" : ""}</span>}
         </p>
       </div>

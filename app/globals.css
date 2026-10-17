@@ -10,6 +10,7 @@
 
   --blue: #3c86f2;
   --blue-strong: #2468d8;
+  --blue-ink: #1b57b8; /* text on blue tints: 4.5:1 or better */
   --blue-tint: #dcebfc;
   --green-tint: #e3f5d6;
   --nav: #12161d;
@@ -34,6 +35,7 @@
   --color-line: var(--line);
   --color-blue: var(--blue);
   --color-blue-strong: var(--blue-strong);
+  --color-blue-ink: var(--blue-ink);
   --color-blue-tint: var(--blue-tint);
   --color-green-tint: var(--green-tint);
   --color-nav: var(--nav);
