@@ -317,7 +317,7 @@ export function Desk() {
                     ))}
                   </div>
 
-                  <form className="mt-4 flex items-center gap-2 rounded-full bg-bg py-1.5 pl-4 pr-1.5" onSubmit={(e) => { e.preventDefault(); ask(followText); }}>
+                  <form className="mt-4 flex items-center gap-2 rounded-full bg-bg py-1.5 pl-4 pr-1.5 outline-blue-strong has-[input:focus-visible]:outline-[3px] has-[input:focus-visible]:outline-offset-2" onSubmit={(e) => { e.preventDefault(); ask(followText); }}>
                     <label htmlFor="follow" className="sr-only">Type a follow-up question</label>
                     <input
                       id="follow"

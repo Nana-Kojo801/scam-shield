@@ -59,9 +59,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-:focus-visible {
-  outline: 3px solid var(--blue-strong);
-  outline-offset: 3px;
+/* In the base layer so utilities like focus:outline-none can override it. Text fields draw the ring
+   on their rounded container instead (see has-[input:focus-visible] in the components). */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--blue-strong);
+    outline-offset: 3px;
+  }
 }
 
 /* faint circles on cards, like the reference tiles */

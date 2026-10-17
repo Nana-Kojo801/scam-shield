@@ -62,7 +62,7 @@ export function Composer({ draft, setDraft, channel, setChannel, onSubmit, texta
         }}
       >
         <label htmlFor="message" className="sr-only">Message to check</label>
-        <div className="rounded-[24px] bg-card p-4">
+        <div className="rounded-[24px] bg-card p-4 outline-blue-strong has-[textarea:focus-visible]:outline-[3px] has-[textarea:focus-visible]:outline-offset-2">
           <textarea
             id="message"
             ref={textareaRef}
