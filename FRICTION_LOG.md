@@ -126,3 +126,29 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 - **Severity:** low.
 - **Workaround:** the owner deployed from the Vercel dashboard; the live site was then verified from outside.
 - **Suggestion:** a Vercel connector for sessions, or a clear place to supply a deploy token.
+
+## 15. My own global focus style silently beat Tailwind's `focus:outline-none`
+
+- **Task:** the follow-up text field showed a square focus border inside a rounded pill (reported from a phone).
+- **Steps:** the input had `focus:outline-none`, so it looked handled.
+- **Expected:** the utility removes the outline.
+- **Actual:** my global `:focus-visible` rule was unlayered CSS, and unlayered rules beat every layered rule (including all Tailwind utilities) regardless of specificity, so the utility never applied. The browser drew a rectangle around the bare input. The composer textarea had the same problem in a different form.
+- **Severity:** low, but easy to miss on a desktop with a mouse.
+- **Workaround:** put the global rule in `@layer base`, remove the field's own outline, and draw the ring on the rounded container with `has-[input:focus-visible]`.
+- **Suggestion:** a lint or dev warning when unlayered CSS overrides a Tailwind utility would have caught this.
+
+## 16. MCP over serverless needs decisions the spec leaves open
+
+- **Task:** expose the check as an MCP tool on Vercel.
+- **Actual:** a stateless server works well, but a few choices had to be made: GET and DELETE return 405 because a long-lived stream does not suit a serverless function; the SDK's built-in origin check is marked deprecated in favour of external middleware, so origin validation is done in the route; and a normal session is three requests (initialize, initialized, then the call), so rate limiting every request would have throttled legitimate clients. Only `tools/call` is limited.
+- **Severity:** low.
+- **Workaround:** the choices above, each covered by a test.
+- **Suggestion:** a short serverless recipe in the SDK docs (stateless, JSON responses, origin check, limits).
+
+## 17. Alexa+ itself cannot be tested from here
+
+- **Task:** confirm the MCP endpoint works with Alexa+.
+- **Actual:** registering an MCP server with Alexa+ happens in Amazon's own tooling, which this build environment cannot reach, so only conformance with the standard transport and the official SDK client could be verified.
+- **Severity:** medium for the hackathon track, low for the code.
+- **Workaround:** test against the official SDK client over real HTTP, locally and on the deployment.
+- **Suggestion:** a public conformance checker or test harness for Alexa+ MCP servers.

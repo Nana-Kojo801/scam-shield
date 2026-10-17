@@ -76,10 +76,60 @@ recognition is missing or blocked, the mic is hidden or explained and typed inpu
 | Follow-up intent matching | `lib/followups.ts` |
 | Check pipeline shared by any front door | `lib/check.ts` |
 
+## MCP server
+
+The same check is also available as a real [Model Context Protocol](https://modelcontextprotocol.io)
+tool, so any MCP client or voice assistant can call it, not just this website.
+
+- **Endpoint:** `POST /api/mcp` (Streamable HTTP, protocol version `2025-11-25`; older clients are
+  negotiated down automatically). https://scam-shield-murex.vercel.app/api/mcp
+- **Tool:** `check_message`
+  - input: `message` (required, up to 4000 characters) and `context` (optional, for example
+    "came by SMS")
+  - output: structured content with `verdict`, `confidence`, `scam_type`, `red_flags` (exact
+    quotes), `reassuring_signs`, `what_to_do`, `verify_via`, `spoken_summary`, `teach_tip`,
+    `signals` and `ai_unavailable`; plus plain text written to be read aloud
+  - annotated read-only; it never opens links
+- **Shared code:** the tool calls the same `checkMessage` pipeline as the website
+  (`lib/check.ts`), so the rules, the model step, the quote validation and the rules-only fallback
+  behave identically. The server is in `lib/mcp.ts`, the HTTP route in `app/api/mcp/route.ts`.
+- **Stateless:** no sessions, no server-to-client stream. Every POST gets one JSON response, which
+  suits serverless hosting. `GET` and `DELETE` return 405.
+- **Safety:** `Origin` is validated (DNS rebinding protection). Calls from agents and assistants
+  carry no `Origin` and are allowed; a browser page is allowed only from this site's own origin or
+  one listed in `MCP_ALLOWED_ORIGINS` (comma separated). Tool calls are rate limited per client;
+  the handshake is not.
+
+Try it with the official SDK client:
+
+```ts
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
+const client = new Client({ name: "demo", version: "1.0.0" });
+await client.connect(new StreamableHTTPClientTransport(new URL("https://scam-shield-murex.vercel.app/api/mcp")));
+const result = await client.callTool({ name: "check_message", arguments: { message: "Pay a small fee within 24 hours or your parcel is returned." } });
+console.log(result.structuredContent.verdict);
+```
+
+or with plain HTTP:
+
+```bash
+curl -s https://scam-shield-murex.vercel.app/api/mcp \
+  -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"curl","version":"1"}}}'
+```
+
+This endpoint follows the Streamable HTTP transport and is tested with the official TypeScript SDK
+client. It has not been tested against Alexa+ itself, because registering a server there happens in
+Amazon's own tooling.
+
 ## Project layout
 
 ```
 app/api/check/route.ts   POST /api/check
+app/api/mcp/route.ts     POST /api/mcp (MCP over Streamable HTTP)
+lib/mcp.ts               the MCP server and its check_message tool
 lib/rules.ts             the deterministic rules
 lib/llm.ts               prompt, JSON schema, call, output validation
 lib/fallback.ts          rules-only result
@@ -107,6 +157,7 @@ npm run lint && npx tsc --noEmit
 | --- | --- |
 | `OPENAI_API_KEY` | Server-side only. Without it the app runs in rules-only mode. |
 | `OPENAI_MODEL` | Optional. Defaults to `gpt-4o-mini` for low cost. |
+| `MCP_ALLOWED_ORIGINS` | Optional. Extra browser origins allowed to call `/api/mcp`, comma separated. |
 
 ### Deploying to Vercel
 
@@ -116,9 +167,11 @@ security headers, including a Permissions-Policy that allows the microphone for 
 
 ## Testing
 
-`npm test` runs 87 unit tests: every rule (including guards against flagging legitimate text),
+`npm test` runs 102 unit tests: every rule (including guards against flagging legitimate text),
 quote validation, the rules-only fallback, the rate limiter, the route's input handling, the model
-call with a stubbed `fetch`, annotation segments, and follow-up intents.
+call with a stubbed `fetch`, annotation segments, follow-up intents, and the MCP server (driven by
+the official SDK client, plus the HTTP route: handshake, version negotiation, origin checks,
+limits).
 
 ## Known limits
 
@@ -133,8 +186,9 @@ call with a stubbed `fetch`, annotation segments, and follow-up intents.
 
 ## Not included
 
-The optional MCP endpoint (`/api/mcp`) and a "scam of the week" mode are not built. The check
-pipeline in `lib/check.ts` is written so another front door can reuse it.
+A "scam of the week" teaching mode is not built. The MCP endpoint is stateless and offers one tool;
+there is no authentication on it, the same as the website, so it relies on the rate limit and the
+input caps.
 
 ## License
 
