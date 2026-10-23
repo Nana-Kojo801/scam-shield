@@ -46,6 +46,7 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 5. Per-IP rate limit gets in the way of manual testing
 
 - **Task:** run repeated manual checks against the dev server.
+- **Steps:** Ran the five manual messages and then further checks against the dev server in quick succession.
 - **Expected:** to be able to iterate freely.
 - **Actual:** after 10 requests in a minute from one address the route returns 429, which looked like a failure in the middle of a test run.
 - **Severity:** low.
@@ -65,6 +66,7 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 7. The assistant's own voice can be picked up by the microphone
 
 - **Task:** the two-step flow where the assistant says "Okay, read me the message" and then listens.
+- **Steps:** Designed the flow in which the assistant speaks a prompt and then starts listening.
 - **Expected:** to be able to start recognition after the prompt finished.
 - **Actual:** browsers generally only allow `SpeechRecognition.start()` from a user gesture or after permission, so starting it after the utterance ends can fail on first use. Starting it on the tap instead lets the mic hear the prompt.
 - **Severity:** medium.
@@ -74,6 +76,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 8. React lint rule rejects the usual "detect browser support" pattern
 
 - **Task:** read `SpeechRecognition` support and `prefers-reduced-motion` on the client.
+- **Steps:** Wrote hooks that read SpeechRecognition support and `prefers-reduced-motion` with `useEffect(() => setX(...), [])`, then ran `eslint`.
+- **Expected:** The lint rule to pass, since this is the common way to detect browser support.
 - **Actual:** the starter's `react-hooks/set-state-in-effect` rule flags `useEffect(() => setX(...), [])`. The accepted pattern is `useSyncExternalStore` with a server snapshot, which is less discoverable.
 - **Severity:** low.
 - **Workaround:** `useSyncExternalStore` for both.
@@ -82,9 +86,12 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 9. Next dev indicator overlaps bottom-left UI in screenshots
 
 - **Task:** review mobile screenshots.
+- **Steps:** Took phone-width screenshots of the app running under `next dev`.
+- **Expected:** Clean screenshots of the app.
 - **Actual:** the development-only "N" button sits over the bottom-left corner and covers text. It does not appear in production builds.
 - **Severity:** low.
 - **Workaround:** take final screenshots against `next start`.
+- **Suggestion:** Make the development indicator easy to move or hide when taking screenshots.
 
 ## 10. Design reference link could not be read by the usual fetch tools
 
@@ -99,13 +106,18 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 11. Same heading rendered twice after the redesign
 
 - **Task:** make the report work as both a phone screen and a desktop panel.
+- **Steps:** Built the result screen as both a phone screen (with its own header) and a desktop panel, then ran scripted browser checks that look up headings by role.
+- **Expected:** One visible "Report" heading per screen.
 - **Actual:** the phone screen header and the report both said "Report", which a scripted accessibility-tree query flagged as two headings.
 - **Severity:** low.
 - **Workaround:** keep the report's own heading for screen readers and focus, and show it visually only on desktop, where there is no screen header.
+- **Suggestion:** A check for duplicate headings within one landmark would flag this earlier.
 
 ## 12. Automated contrast audit flagged text that was only mid-fade
 
 - **Task:** accessibility pass with axe-core on every screen.
+- **Steps:** Ran axe-core on each screen straight after it appeared.
+- **Expected:** Only real contrast failures to be reported.
 - **Actual:** the first run reported contrast failures on text that was still fading in (colours sampled at partial opacity), mixed in with real failures (faint placeholder, dimmed pending rows, blue chip text at 4.28:1).
 - **Severity:** low.
 - **Workaround:** wait for animations to finish before sampling, and replace opacity-based dimming with solid colours.
@@ -114,6 +126,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 13. Fake-clock tests need small steps for React timers
 
 - **Task:** test the 35 second client timeout without waiting 35 seconds.
+- **Steps:** Used Playwright's fake clock and advanced it in one large step to reach the waiting state, then past the 35 second timeout.
+- **Expected:** The UI to reach the waiting state after the clock advanced.
 - **Actual:** one large `clock.runFor` jump fires chained timers (each scheduled after a render) before React can schedule the next one, so the UI never reached the state under test.
 - **Severity:** low.
 - **Workaround:** advance the clock in small steps with a short real wait between them.
@@ -122,6 +136,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 14. Deploying needs credentials the build environment does not have
 
 - **Task:** deploy to Vercel from the cloud session.
+- **Steps:** Checked the session's environment for a Vercel token or connector and probed whether `api.vercel.com` was reachable.
+- **Expected:** To deploy from the session with the owner's account.
 - **Actual:** Vercel was reachable, but there was no token or connector, so the repository owner imported the project themselves.
 - **Severity:** low.
 - **Workaround:** the owner deployed from the Vercel dashboard; the live site was then verified from outside.
@@ -140,6 +156,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 16. MCP over serverless needs decisions the spec leaves open
 
 - **Task:** expose the check as an MCP tool on Vercel.
+- **Steps:** Wrote the stateless route with the SDK's web-standard transport, read its options, and wrote a test for each decision.
+- **Expected:** A documented recipe for running a stateless MCP server on serverless hosting.
 - **Actual:** a stateless server works well, but a few choices had to be made: GET and DELETE return 405 because a long-lived stream does not suit a serverless function; the SDK's built-in origin check is marked deprecated in favour of external middleware, so origin validation is done in the route; and a normal session is three requests (initialize, initialized, then the call), so rate limiting every request would have throttled legitimate clients. Only `tools/call` is limited.
 - **Severity:** low.
 - **Workaround:** the choices above, each covered by a test.
@@ -148,6 +166,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 17. Alexa+ itself cannot be tested from here
 
 - **Task:** confirm the MCP endpoint works with Alexa+.
+- **Steps:** Built the endpoint and verified it with the official MCP client over real HTTP.
+- **Expected:** A way to confirm the integration with the target assistant.
 - **Actual:** registering an MCP server with Alexa+ happens in Amazon's own tooling, which this build environment cannot reach, so only conformance with the standard transport and the official SDK client could be verified.
 - **Severity:** medium for the hackathon track, low for the code.
 - **Workaround:** test against the official SDK client over real HTTP, locally and on the deployment.
@@ -156,6 +176,8 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 18. A secret-protected endpoint has to decide what "not configured" means
 
 - **Task:** put a shared secret on `/api/mcp`.
+- **Steps:** Implemented the bearer-token check and decided what the endpoint should do when the variable is missing.
+- **Expected:** A safe default without extra decisions from the developer.
 - **Actual:** the obvious version (check the token if one is set) is open by default, so a forgotten environment variable on the host silently leaves the endpoint public, and the owner would never see an error. The opposite choice (refuse until configured) is safe but means the live endpoint stops working between deploying the code and adding the variable.
 - **Severity:** medium, because the failure is silent.
 - **Workaround:** fail closed in production (503 with a clear message), open outside production, with an explicit `MCP_ALLOW_UNAUTHENTICATED=true` opt-out. The variable is therefore added to the host before the code is deployed.
@@ -164,6 +186,9 @@ Entry template: task attempted, steps taken, expected vs. actual, severity (low/
 ## 19. Brute-force limiting must not punish the legitimate caller
 
 - **Task:** slow down token guessing.
+- **Steps:** Added rate limiting for failed token attempts and considered reusing the per-request limiter.
+- **Expected:** A limiter that stops guessing without blocking real clients.
 - **Actual:** reusing the per-request limiter would have counted valid calls too, throttling real clients (a session is three requests). Only failed attempts are counted, against a separate key, so a real client sharing an address with an attacker still gets through.
 - **Severity:** low.
 - **Workaround:** a separate failure-only counter, covered by tests.
+- **Suggestion:** Count only failures, under a separate key (as `lib/mcp-auth.ts` now does).

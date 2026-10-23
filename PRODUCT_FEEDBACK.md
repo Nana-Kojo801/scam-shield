@@ -79,7 +79,7 @@ Notes on each tool, API and SDK used. Fields: used for, what worked, what needs 
 ## Model Context Protocol TypeScript SDK (`@modelcontextprotocol/sdk` 1.32)
 
 - **Used for:** the `/api/mcp` server (`McpServer`, `WebStandardStreamableHTTPServerTransport`) and, in tests, its `Client` and `InMemoryTransport`.
-- **Worked:** the web-standard transport takes a plain `Request` and returns a `Response`, so it fits a Next.js route handler with no adapter. `registerTool` with zod input and output schemas gives validation and structured output for free; the client validates the result against the output schema, which caught a mismatched field during development. `2025-11-25` is the SDK's latest protocol version and older clients negotiate down. The in-memory transport makes the server easy to test.
+- **Worked:** the web-standard transport takes a plain `Request` and returns a `Response`, so it fits a Next.js route handler with no adapter. `registerTool` with zod input and output schemas gives validation and structured output for free; the SDK client validates a tool result against its output schema, so the tests check the structured output for free. `2025-11-25` is the SDK's latest protocol version and older clients negotiate down. The in-memory transport makes the server easy to test.
 - **Needs work:** origin validation is deprecated in the transport with no replacement recipe (FRICTION_LOG #16); the docs lean towards stateful servers.
 - **Onboarding:** fast, about an hour to a working, tested endpoint.
 - **Would use again:** yes.
